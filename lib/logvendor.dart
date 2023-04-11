@@ -36,6 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
       body: SingleChildScrollView(
+          child: Form(
+          key:_formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -96,16 +98,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               'Add Restaurant',
                               style: TextStyle(
                                 color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                                fontWeight: FontWeight.bold,),),
                           ),
-
                         ],
                       ),
                     ],
                   ),
                 ),
+      ),
     );
   }
 }

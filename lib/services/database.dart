@@ -1,22 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:vendorapp/classes/Resturant.dart';
 
 class DatabaseServices {
   final CollectionReference restaurantsCollection =
   FirebaseFirestore.instance.collection('restaurants');
 
   // Function to add a new restaurant document to Firestore
-  Future<void> addRestaurant(String name, String description, String image,
-      String foodCategory, int numTables, int numSeats,
-      List<String> timeSlots, Map<String, double> salesPoint) async {
+  Future<void> addRestaurant(Restaurant res) async {
     await restaurantsCollection.add({
-      'name': name,
-      'description': description,
-      'image': image,
-      'food_category': foodCategory,
-      'num_tables': numTables,
-      'num_seats': numSeats,
-      'time_slots': timeSlots,
-      'sales_point': salesPoint,
+      'name': res.name,
+      'description': res.description,
+      'image': res.image,
+      'food_category': res.foodCategory,
+      'num_tables': res.numTables,
+      'num_seats': res.numSeats,
+      // 'time_slots': timeSlots,
+      // 'sales_point': salesPoint,
     });
   }
 
@@ -62,3 +61,7 @@ class DatabaseServices {
     return querySnapshot.docs.first;
   }
 }
+//
+// (String name, String description, String image,
+// String foodCategory, int numTables, int numSeats,
+// List<String> timeSlots, Map<String, double> salesPoint)

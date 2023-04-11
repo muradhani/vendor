@@ -1,15 +1,23 @@
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:vendorapp/classes/Resturant.dart';
+import 'package:vendorapp/services/database.dart';
 import 'dart:io';
 
 import 'logvendor.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  // var data = DatabaseServices();
+  // data.addRestaurant("murad2", "ddddddd", "image", "foodCategory", 20, 20);
   runApp(MyApp());
+
 }
+
 
 class MyApp extends StatelessWidget {
   @override
@@ -29,6 +37,7 @@ class MyApp extends StatelessWidget {
 
 class AddRestaurantScreen extends StatefulWidget
 {
+
   @override
   _AddRestaurantScreenState createState() => _AddRestaurantScreenState();
 }
@@ -42,6 +51,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
   final _numSeatsPerTableController = TextEditingController();
   final _locationController = TextEditingController();
   final picker = ImagePicker();
+  Restaurant restaurant = Restaurant.empty();
 
   File? _image;
 
@@ -167,6 +177,9 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   if (value!.isEmpty) {
                     return 'Please enter a restaurant name';
                   }
+                  else{
+                    restaurant.name = value;
+                  }
                   return null;
                 },
               ),
@@ -179,6 +192,9 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Please enter a description';
+                  }
+                  else{
+                    restaurant.description = value;
                   }
                   return null;
                 },
@@ -193,6 +209,9 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   if (value!.isEmpty) {
                     return 'Please enter a food category';
                   }
+                  else{
+                    restaurant.foodCategory = value;
+                  }
                   return null;
                 },
               ),
@@ -206,6 +225,9 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Please enter the number of tables';
+                  }
+                  else{
+                    restaurant.numTables = int.parse(value);
                   }
                   return null;
                 },
@@ -223,6 +245,9 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   else if(int. parse(value) > 6) {
                     return 'each Table should have at most 6 seats';
                   }
+                  else{
+                    restaurant.numSeats = int.parse(value);
+                  }
                   return null;
                 },
               ),
@@ -236,6 +261,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   if (value!.isEmpty) {
                     return 'Please enter the location of the resturant';
                   }
+
                   return null;
                 },
               ),
@@ -271,8 +297,12 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   ),
                 ),
                 onPressed: () {
+
+
                   if (_formKey.currentState!.validate()) {
                     // TODO: Save the restaurant data to the database
+                    var data = DatabaseServices();
+                    data.addRestaurant(restaurant);
                     Navigator.pop(context);
                   }
                 },
