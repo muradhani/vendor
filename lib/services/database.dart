@@ -10,10 +10,10 @@ class DatabaseServices {
     await restaurantsCollection.add({
       'name': res.name,
       'description': res.description,
-      'image': res.image,
       'food_category': res.foodCategory,
       'num_tables': res.numTables,
       'num_seats': res.numSeats,
+      //'time_slots':
       // 'time_slots': timeSlots,
       // 'sales_point': salesPoint,
     });

@@ -54,6 +54,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
   Restaurant restaurant = Restaurant.empty();
 
   File? _image;
+  List<TimeOfDay> selectedSlots = [];
 
   final List<TimeOfDay> _timeslots =
   [
@@ -280,7 +281,15 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                         ? (bool? value) {
                       setState(() {
                         _selectedTimeslots[index] = value!;
-                        _updateSelectedCount(value);
+                        if (value!) {
+                          selectedSlots.add(_timeslots[index]);
+                          _updateSelectedCount(true);
+                        } else {
+                          selectedSlots.remove(_timeslots[index]);
+                          _updateSelectedCount(false);
+                        }
+                        print(selectedSlots);
+
                       });
                     }
                         : null,
