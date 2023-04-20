@@ -54,7 +54,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
   Restaurant restaurant = Restaurant.empty();
 
   File? _image;
-  List<TimeOfDay> selectedSlots = [];
+  List<String> selectedSlots = [];
 
   final List<TimeOfDay> _timeslots =
   [
@@ -282,10 +282,10 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                       setState(() {
                         _selectedTimeslots[index] = value!;
                         if (value!) {
-                          selectedSlots.add(_timeslots[index]);
+                          selectedSlots.add(_timeslots[index].format(context));
                           _updateSelectedCount(true);
                         } else {
-                          selectedSlots.remove(_timeslots[index]);
+                          selectedSlots.remove(_timeslots[index].format(context));
                           _updateSelectedCount(false);
                         }
                         print(selectedSlots);
@@ -311,6 +311,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   if (_formKey.currentState!.validate()) {
                     // TODO: Save the restaurant data to the database
                     var data = DatabaseServices();
+                    restaurant.timeslots = selectedSlots;
                     data.addRestaurant(restaurant);
                     Navigator.pop(context);
                   }
