@@ -7,14 +7,15 @@ class Restaurant {
   List<String> _timeslots;
   int? _id;
   String _location;
+  String _imgUrl;
 
   // Constructor with id parameter
   Restaurant.withId(this._id, this._name, this._description, this._foodCategory,
-      this._numTables, this._numSeats, this._timeslots,this._location);
+      this._numTables, this._numSeats, this._timeslots,this._location,this._imgUrl);
 
   // Constructor without id parameter (sets _id to null)
   Restaurant(this._name, this._description, this._foodCategory, this._numTables,
-      this._numSeats, this._timeslots,this._location)
+      this._numSeats, this._timeslots,this._location,this._imgUrl)
       : _id = null;
 
   // Empty constructor
@@ -26,7 +27,8 @@ class Restaurant {
         _numSeats = 0,
         _timeslots = [],
         _id = null,
-        _location='';
+        _location='',
+        _imgUrl='';
 
   String get name => _name;
 
@@ -60,5 +62,11 @@ class Restaurant {
 
   set location(String value) {
     _location = value;
+  }
+
+  String get imgUrl => _imgUrl;
+
+  set imgUrl(String value) {
+    _imgUrl = value;
   }
 }

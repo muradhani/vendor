@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'logvendor.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 
 void main() async {
@@ -306,12 +307,38 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   ),
                 ),
                 onPressed: () {
-
-
                   if (_formKey.currentState!.validate()) {
                     // TODO: Save the restaurant data to the database
+                    final FirebaseStorage storage = FirebaseStorage.instance;
                     var data = DatabaseServices();
                     restaurant.timeslots = selectedSlots;
+                    //String imageurl;
+                    Reference ref;
+                    String downloadUrl="";
+                    final _image = this._image;
+                    if(_image != null) {
+                      ref = storage.ref().child(_image.path
+                          .split('/')
+                          .last);
+                      UploadTask uploadTask = ref.putFile(_image!);
+                      uploadTask.then((res) {
+                        print('File uploaded successfully.');
+                      }).catchError((error) {
+                        print('Error uploading file: $error');
+                      });
+
+                      uploadTask.whenComplete(() async {
+                        downloadUrl = await ref.getDownloadURL();
+                        print("Download URL: $downloadUrl");
+                        restaurant.imgUrl = downloadUrl.toString();
+                      }).catchError((error) {
+                        print('Error uploading file: $error');
+                      });
+
+                    }
+
+                    print(restaurant.imgUrl);
+
                     data.addRestaurant(restaurant);
                     Navigator.pop(context);
                   }

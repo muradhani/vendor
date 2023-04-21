@@ -14,7 +14,8 @@ class DatabaseServices {
       'num_tables': res.numTables,
       'num_seats': res.numSeats,
       'time_slots': res.timeslots,
-      'location':res.location
+      'location':res.location,
+      'image':res.imgUrl
       // 'sales_point': salesPoint,
     });
   }
