@@ -262,7 +262,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   if (value!.isEmpty) {
                     return 'Please enter the location of the resturant';
                   }
-
+                  restaurant.location = value;
                   return null;
                 },
               ),
