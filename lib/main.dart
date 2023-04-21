@@ -314,7 +314,6 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                     restaurant.timeslots = selectedSlots;
                     //String imageurl;
                     Reference ref;
-                    String downloadUrl="";
                     final _image = this._image;
                     if(_image != null) {
                       ref = storage.ref().child(_image.path
@@ -328,18 +327,17 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                       });
 
                       uploadTask.whenComplete(() async {
-                        downloadUrl = await ref.getDownloadURL();
-                        print("Download URL: $downloadUrl");
+                        String downloadUrl = await ref.getDownloadURL();
+                        //print("Download URL: $downloadUrl");
                         restaurant.imgUrl = downloadUrl.toString();
+                        //print("img url : "+restaurant.imgUrl.toString());
+                        await data.addRestaurant(restaurant);
                       }).catchError((error) {
                         print('Error uploading file: $error');
                       });
 
                     }
 
-                    print(restaurant.imgUrl);
-
-                    data.addRestaurant(restaurant);
                     Navigator.pop(context);
                   }
                 },

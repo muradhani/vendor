@@ -16,7 +16,6 @@ class DatabaseServices {
       'time_slots': res.timeslots,
       'location':res.location,
       'image':res.imgUrl
-      // 'sales_point': salesPoint,
     });
   }
 
@@ -62,7 +61,3 @@ class DatabaseServices {
     return querySnapshot.docs.first;
   }
 }
-//
-// (String name, String description, String image,
-// String foodCategory, int numTables, int numSeats,
-// List<String> timeSlots, Map<String, double> salesPoint)
