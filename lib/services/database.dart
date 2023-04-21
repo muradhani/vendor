@@ -13,8 +13,8 @@ class DatabaseServices {
       'food_category': res.foodCategory,
       'num_tables': res.numTables,
       'num_seats': res.numSeats,
-      'time_slots': res.timeslots
-      // 'time_slots': timeSlots,
+      'time_slots': res.timeslots,
+      'location':res.location
       // 'sales_point': salesPoint,
     });
   }

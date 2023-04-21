@@ -6,14 +6,15 @@ class Restaurant {
   int _numSeats;
   List<String> _timeslots;
   int? _id;
+  String _location;
 
   // Constructor with id parameter
   Restaurant.withId(this._id, this._name, this._description, this._foodCategory,
-      this._numTables, this._numSeats, this._timeslots);
+      this._numTables, this._numSeats, this._timeslots,this._location);
 
   // Constructor without id parameter (sets _id to null)
   Restaurant(this._name, this._description, this._foodCategory, this._numTables,
-      this._numSeats, this._timeslots)
+      this._numSeats, this._timeslots,this._location)
       : _id = null;
 
   // Empty constructor
@@ -24,7 +25,8 @@ class Restaurant {
         _numTables = 0,
         _numSeats = 0,
         _timeslots = [],
-        _id = null;
+        _id = null,
+        _location='';
 
   String get name => _name;
 
@@ -53,4 +55,10 @@ class Restaurant {
   int? get id => _id;
 
   set id(int? id) => _id = id;
+
+  String get location => _location;
+
+  set location(String value) {
+    _location = value;
+  }
 }
