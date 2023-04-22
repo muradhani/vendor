@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:vendorapp/classes/Resturant.dart';
+import 'package:vendorapp/services/database.dart';
 
 class RestaurantDetailsPage extends StatelessWidget {
   final Restaurant restaurant;
+
 
   const RestaurantDetailsPage({Key? key, required this.restaurant})
       : super(key: key);
@@ -75,44 +77,62 @@ class RestaurantDetailsPage extends StatelessWidget {
 
 class TableLayout extends StatelessWidget {
   final Restaurant restaurant;
-
   const TableLayout({Key? key, required this.restaurant}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-      ),
-      itemCount: restaurant.numTables,
-      itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.grey[300],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Table ${index + 1}',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+    final DatabaseServices data = DatabaseServices();
+
+    return FutureBuilder<List<int>>(
+      future: data.getBookedTables(restaurant.id ),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Text('Error: ${snapshot.error}'),
+          );
+        } else {
+          final bookedTables = snapshot.data ?? [];
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            itemCount: restaurant.numTables,
+            itemBuilder: (context, index) {
+              final isBooked = bookedTables.contains(index + 1);
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: isBooked ? Colors.redAccent : Colors.grey[300],
                 ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                '${restaurant.numSeats} seats',
-                style: TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
-        );
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Table ${index + 1}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      '${restaurant.numSeats} seats',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        }
       },
     );
   }

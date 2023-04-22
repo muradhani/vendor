@@ -7,7 +7,7 @@ class Restaurant {
   int _numTables;
   int _numSeats;
   List<String> _timeslots;
-  String? _id;
+  String _id;
   String _location;
   String _imgUrl;
 
@@ -18,7 +18,7 @@ class Restaurant {
   // Constructor without id parameter (sets _id to null)
   Restaurant(this._name, this._description, this._foodCategory, this._numTables,
       this._numSeats, this._timeslots,this._location,this._imgUrl)
-      : _id = null;
+      : _id = 'null';
 
   // Empty constructor
   Restaurant.empty()
@@ -72,9 +72,9 @@ class Restaurant {
 
   set timeslots(List<String> timeslots) => _timeslots = timeslots;
 
-  String? get id => _id;
+  String get id => _id;
 
-  set id(String? id) => _id = id;
+  set id(String id) => _id = id;
 
   String get location => _location;
 

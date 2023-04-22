@@ -5,6 +5,9 @@ class DatabaseServices {
   final CollectionReference restaurantsCollection =
   FirebaseFirestore.instance.collection('restaurants');
 
+  final CollectionReference booksCollection =
+  FirebaseFirestore.instance.collection('books');
+
   // Function to add a new restaurant document to Firestore
   Future<void> addRestaurant(Restaurant res) async {
     await restaurantsCollection.add({
@@ -68,4 +71,23 @@ class DatabaseServices {
         .get();
     return querySnapshot.docs;
   }
+
+  Future<List<int>> getBookedTables(String restaurantId) async {
+    List<int> bookedTables = [];
+
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('books')
+        .where('resturant_id', isEqualTo: restaurantId)
+        .get();
+
+    querySnapshot.docs.forEach((doc) {
+      List<dynamic> bookedTableNumbers = doc['booked_tables'];
+      bookedTableNumbers.forEach((tableNumber) {
+        bookedTables.add(tableNumber);
+      });
+    });
+
+    return bookedTables;
+  }
+
 }
