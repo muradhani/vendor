@@ -1,6 +1,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:vendorapp/search_page.dart';
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -43,21 +44,21 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
                       Image.asset('images/1-removebg-preview.png',
                       height: 350,),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: 
-                        TextFormField(
-                          validator: (input) {
-                            if (input!.isEmpty) {
-                              return 'Please type the Restaurant Name';
-                            }
-                            return null;
-                          },
-                          onSaved: (input) => _RestaurantName = input!,
-                          decoration: const InputDecoration(
-                            labelText: 'Restaurant Name',),
-                        ),
-                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(horizontal: 10),
+                      //   child:
+                      //   TextFormField(
+                      //     validator: (input) {
+                      //       if (input!.isEmpty) {
+                      //         return 'Please type the Restaurant Name';
+                      //       }
+                      //       return null;
+                      //     },
+                      //     onSaved: (input) => _RestaurantName = input!,
+                      //     decoration: const InputDecoration(
+                      //       labelText: 'Restaurant Name',),
+                      //   ),
+                      // ),
                       SizedBox(height: 20,),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -71,9 +72,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(25),
                               ),
                             ),
-                            onPressed: _submit,
+                            onPressed:(){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => SearchPage()),
+                              );
+
+                            },
                             child: Text(
-                              'Submit',
+                              'Search',
                               style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,

@@ -60,4 +60,12 @@ class DatabaseServices {
     }
     return querySnapshot.docs.first;
   }
+
+  Future<List<DocumentSnapshot>> searchRestaurantsByName(String query) async {
+    final querySnapshot = await restaurantsCollection
+        .where('name', isGreaterThanOrEqualTo: query)
+        .where('name', isLessThan: query + 'z')
+        .get();
+    return querySnapshot.docs;
+  }
 }

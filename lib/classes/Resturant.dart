@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Restaurant {
   String _name;
   String _description;
@@ -5,7 +7,7 @@ class Restaurant {
   int _numTables;
   int _numSeats;
   List<String> _timeslots;
-  int? _id;
+  String? _id;
   String _location;
   String _imgUrl;
 
@@ -26,9 +28,25 @@ class Restaurant {
         _numTables = 0,
         _numSeats = 0,
         _timeslots = [],
-        _id = null,
+        _id = '',
         _location='',
         _imgUrl='';
+
+
+  factory Restaurant.fromSnapshot(DocumentSnapshot snapshot) {
+    final data = snapshot.data() as Map<String, dynamic>;
+    return Restaurant.withId(
+      snapshot.id,
+      data['name'] as String,
+      data['description'] as String,
+      data['food_category'] as String,
+      data['num_tables'] as int,
+      data['num_seats'] as int,
+      List<String>.from(data['time_slots'] as List) as List<String>,
+      data['location'] as String,
+      data['image'] as String,
+    );
+  }
 
   String get name => _name;
 
@@ -54,9 +72,9 @@ class Restaurant {
 
   set timeslots(List<String> timeslots) => _timeslots = timeslots;
 
-  int? get id => _id;
+  String? get id => _id;
 
-  set id(int? id) => _id = id;
+  set id(String? id) => _id = id;
 
   String get location => _location;
 
