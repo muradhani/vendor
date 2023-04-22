@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:vendorapp/classes/Resturant.dart';
 import 'package:vendorapp/services/database.dart';
 
+import 'Resturant_details.dart';
+
 class SearchPage extends StatefulWidget {
   @override
   _SearchPageState createState() => _SearchPageState();
@@ -53,19 +55,30 @@ class _SearchPageState extends State<SearchPage> {
               itemBuilder: (BuildContext context, int index) {
                 final docSnapshot = _searchResults[index];
                 final restaurant = Restaurant.fromSnapshot(docSnapshot);
-                return Card(
-                  child: ListTile(
-                    leading: Image.network(
-                      restaurant.imgUrl,
-                      width: 50.0,
-                      height: 50.0,
-                      fit: BoxFit.cover,
-                    ),
-                    title: Text(restaurant.name),
-                    subtitle: Text(restaurant.description),
 
+                return Card(
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RestaurantDetailsPage(restaurant: restaurant),
+                        ),
+                      );
+                    },
+                    child: ListTile(
+                      leading: Image.network(
+                        restaurant.imgUrl,
+                        width: 50.0,
+                        height: 50.0,
+                        fit: BoxFit.cover,
+                      ),
+                      title: Text(restaurant.name),
+                      subtitle: Text(restaurant.description),
+                    ),
                   ),
                 );
+
               },
             ),
           ),
