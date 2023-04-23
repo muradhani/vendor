@@ -10,14 +10,14 @@ class Restaurant {
   String _id;
   String _location;
   String _imgUrl;
-
+  String _token;
   // Constructor with id parameter
   Restaurant.withId(this._id, this._name, this._description, this._foodCategory,
-      this._numTables, this._numSeats, this._timeslots,this._location,this._imgUrl);
+      this._numTables, this._numSeats, this._timeslots,this._location,this._imgUrl,this._token);
 
   // Constructor without id parameter (sets _id to null)
   Restaurant(this._name, this._description, this._foodCategory, this._numTables,
-      this._numSeats, this._timeslots,this._location,this._imgUrl)
+      this._numSeats, this._timeslots,this._location,this._imgUrl,this._token)
       : _id = 'null';
 
   // Empty constructor
@@ -30,7 +30,8 @@ class Restaurant {
         _timeslots = [],
         _id = '',
         _location='',
-        _imgUrl='';
+        _imgUrl='',
+        _token='';
 
 
   factory Restaurant.fromSnapshot(DocumentSnapshot snapshot) {
@@ -45,6 +46,7 @@ class Restaurant {
       List<String>.from(data['time_slots'] as List) as List<String>,
       data['location'] as String,
       data['image'] as String,
+      data['token'] ,
     );
   }
 
@@ -87,4 +89,11 @@ class Restaurant {
   set imgUrl(String value) {
     _imgUrl = value;
   }
+
+  String get token => _token;
+
+  set token(String value) {
+    _token = value;
+  }
+
 }

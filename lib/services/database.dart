@@ -3,7 +3,7 @@ import 'package:vendorapp/classes/Resturant.dart';
 
 class DatabaseServices {
   final CollectionReference restaurantsCollection =
-  FirebaseFirestore.instance.collection('restaurants');
+  FirebaseFirestore.instance.collection('resturant');
 
   final CollectionReference booksCollection =
   FirebaseFirestore.instance.collection('books');
@@ -18,7 +18,8 @@ class DatabaseServices {
       'num_seats': res.numSeats,
       'time_slots': res.timeslots,
       'location':res.location,
-      'image':res.imgUrl
+      'image':res.imgUrl,
+      'token':res.token
     });
   }
 

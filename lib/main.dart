@@ -8,6 +8,7 @@ import 'dart:io';
 import 'logvendor.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 
 void main() async {
@@ -56,7 +57,25 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
 
   File? _image;
   List<String> selectedSlots = [];
+  //String _fcmToken;
+  @override
+  void initState() {
+    super.initState();
+    _getFcmToken();
+  }
+  Future<void> _getFcmToken() async {
+    String? token = await FirebaseMessaging.instance.getToken();
+    if(token != null){
+      setState(() {
+        String fcmToken = token;
+        restaurant.token = fcmToken;
+        print("the token is "+fcmToken.toString());
+      });
 
+
+    }
+
+  }
   final List<TimeOfDay> _timeslots =
   [
     TimeOfDay(hour: 15, minute:0),
