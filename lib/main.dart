@@ -1,15 +1,18 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vendorapp/classes/Resturant.dart';
 import 'package:vendorapp/services/database.dart';
 import 'dart:io';
 
+import 'LocationSearch.dart';
 import 'logvendor.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-
+import 'package:geocoding/geocoding.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,20 +57,42 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
   final _locationController = TextEditingController();
   final picker = ImagePicker();
   Restaurant restaurant = Restaurant.empty();
-
+  String fcmToken='';
   File? _image;
   List<String> selectedSlots = [];
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  String? _selectedLocation;
+  Future<List<Location>> _getLocationSuggestions(String query) async {
+    List<Location> locations = await locationFromAddress(query);
+    return locations;
+  }
   //String _fcmToken;
   @override
   void initState() {
     super.initState();
     _getFcmToken();
+    // Listen for changes to the Firestore collection
+    // FirebaseFirestore.instance
+    //     .collection('myCollection')
+    //     .snapshots()
+    //     .listen((QuerySnapshot querySnapshot) {
+    //   querySnapshot.docChanges.forEach((change) {
+    //     if (change.type == DocumentChangeType.added) {
+    //       // Call the Cloud Function to send a push notification to the device when a new document is added to the collection
+    //       FirebaseMessaging.send(<String, dynamic>{
+    //         'title': change.doc['title'],
+    //         'body': change.doc['body'],
+    //         'deviceToken': _deviceToken,
+    //       });
+    //     }
+    //   });
+    // });
   }
   Future<void> _getFcmToken() async {
     String? token = await FirebaseMessaging.instance.getToken();
     if(token != null){
       setState(() {
-        String fcmToken = token;
+        fcmToken = token;
         restaurant.token = fcmToken;
         print("the token is "+fcmToken.toString());
       });
@@ -91,7 +116,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
 
   final List<bool> _selectedTimeslots = List.filled(9,false);
   int _selectedCount = 0;
-
+  String apiKey = 'AIzaSyC-2_Kfdr855XvkoCfj5qf6cFHGQKFGOFQ';
 
   void _updateSelectedCount(bool value)
   {
@@ -279,16 +304,37 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   labelText: 'Enter your location',
                 ),
                 validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter the location of the resturant';
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the location of the restaurant';
                   }
+
+                  // List<Location> locations =_getLocationSuggestions(value) as List<Location>;
                   restaurant.location = value;
                   return null;
                 },
+                onSaved: (value) async {
+                  // your logic here
+                },
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  // final suggestion = await Navigator.push<String>(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => SearchPage()),
+                  // );
+                  // restaurant.location = suggestion!;
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>SearchPage())).then((suggestion) {
+                    if(suggestion != null){
+                      setState(() {
+                        _locationController.text = suggestion;
+                      });
+                    }
+                  } );
+                },
+                child: Text('Location Search'),
               ),
               const SizedBox(height: 16.0),
               const Text('Select up to 5 timeslots:'),
-
               GridView.builder(
                 shrinkWrap: true,
                 itemCount: _timeslots.length,
