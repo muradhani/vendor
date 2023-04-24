@@ -309,7 +309,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   }
 
                   // List<Location> locations =_getLocationSuggestions(value) as List<Location>;
-                  restaurant.location = value;
+                  //restaurant.location = value;
                   return null;
                 },
                 onSaved: (value) async {
@@ -328,6 +328,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                       setState(() {
                         _locationController.text = suggestion;
                       });
+                      restaurant.location = suggestion;
                     }
                   } );
                 },
