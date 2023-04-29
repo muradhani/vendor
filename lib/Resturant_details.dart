@@ -106,7 +106,7 @@ class TableLayout extends StatelessWidget {
             ),
             itemCount: restaurant.numTables,
             itemBuilder: (context, index) {
-              final isBooked = bookedTables.contains(index + 1);
+              final isBooked = index > bookedTables.length - 1 ? false : true;
               return Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),

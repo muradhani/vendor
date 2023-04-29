@@ -9,18 +9,29 @@ class DatabaseServices {
   FirebaseFirestore.instance.collection('books');
 
   // Function to add a new restaurant document to Firestore
-  Future<void> addRestaurant(Restaurant res) async {
-    await restaurantsCollection.add({
+  Future<String> addRestaurant(Restaurant res) async {
+    final docRef = await restaurantsCollection.add({
       'name': res.name,
       'description': res.description,
       'food_category': res.foodCategory,
       'num_tables': res.numTables,
       'num_seats': res.numSeats,
       'time_slots': res.timeslots,
-      'location':res.location,
-      'image':res.imgUrl,
-      'token':res.token
+      'location': res.location,
+      'image': res.imgUrl,
+      'token': res.token
     });
+
+    // Get the ID of the newly added document
+    final restaurantId = docRef.id;
+
+    // Add a new document to the books collection with the restaurant ID
+    await booksCollection.add({
+      'restaurant_id': restaurantId,
+      'booked_tables': []
+    });
+
+    return restaurantId;
   }
 
   // Function to get a list of all restaurants in Firestore
@@ -78,7 +89,7 @@ class DatabaseServices {
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('books')
-        .where('resturant_id', isEqualTo: restaurantId)
+        .where('restaurant_id', isEqualTo: restaurantId)
         .get();
 
     querySnapshot.docs.forEach((doc) {
@@ -87,7 +98,7 @@ class DatabaseServices {
         bookedTables.add(tableNumber);
       });
     });
-
+    print(bookedTables);
     return bookedTables;
   }
 
