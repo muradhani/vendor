@@ -59,6 +59,8 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
   Restaurant restaurant = Restaurant.empty();
   String fcmToken='';
   File? _image;
+  String? _userLocation;
+
   List<String> selectedSlots = [];
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   String? _selectedLocation;
@@ -323,12 +325,14 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   //   MaterialPageRoute(builder: (context) => SearchPage()),
                   // );
                   // restaurant.location = suggestion!;
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>SearchPage())).then((suggestion) {
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>UserLocationPicker())).then((suggestion) {
                     if(suggestion != null){
                       setState(() {
-                        _locationController.text = suggestion;
+                        _userLocation = suggestion;
+                        _locationController.text = _userLocation!;
+                        restaurant.location = _userLocation!;
                       });
-                      restaurant.location = suggestion;
+
                     }
                   } );
                 },
