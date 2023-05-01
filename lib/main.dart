@@ -14,13 +14,41 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   // var data = DatabaseServices();
   // data.addRestaurant("murad2", "ddddddd", "image", "foodCategory", 20, 20);
+  MessagingService messagingService = MessagingService();
+  await messagingService.initialize();
   runApp(MyApp());
+}
+class MessagingService {
+  late FirebaseMessaging _firebaseMessaging;
+
+  Future<void> initialize() async {
+    _firebaseMessaging = FirebaseMessaging.instance;
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message whilst in the foreground!');
+      print('Message data: ${message.data}');
+
+      if (message.notification != null) {
+        print('Message also contained a notification: ${message.notification}');
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new onMessageOpenedApp event was published!');
+      print('Message data: ${message.data}');
+
+      if (message.notification != null) {
+        print('Message also contained a notification: ${message.notification}');
+      }
+    });
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -56,6 +84,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
   String fcmToken = '';
   File? _image;
   String? _userLocation;
+  List<String> foodCategories = [];
 
   List<String> selectedSlots = [];
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -233,18 +262,34 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                 },
               ),
               TextFormField(
-                controller: _foodCategoryController,
                 decoration: const InputDecoration(
                   labelText: 'Food Category',
                 ),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter a food category';
-                  } else {
-                    restaurant.foodCategory = value;
-                  }
-                  return null;
+                controller: _foodCategoryController,
+                onEditingComplete: () {
+                  setState(() {
+                    foodCategories.add(_foodCategoryController.text);
+                  });
+                  _foodCategoryController.clear();
                 },
+              ),
+              ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: foodCategories.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      title: Text(foodCategories[index]),
+                      trailing: IconButton(
+                        icon:Icon(Icons.delete),
+                        onPressed: (){
+                          setState(() {
+                            foodCategories.removeAt(index);
+                          });
+                        },
+                      ),
+                    );
+                  }
               ),
               TextFormField(
                 controller: _numTablesController,
@@ -288,31 +333,35 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                     return 'Please enter the location of the restaurant';
                   }
 
-
                   return null;
                 },
                 onSaved: (value) async {
                   // your logic here
                 },
               ),
-          ElevatedButton(
-            onPressed: () async {
-              final suggestion = await Navigator.push(context, MaterialPageRoute(builder: (context) => UserLocationPicker()));
-              if (suggestion != null) {
-                setState(() async {
-                  final location = suggestion as Position;
-                  restaurant.longitude = location.longitude.toString();
-                  restaurant.latitude = location.latitude.toString();
-                  RestaurantDetailsPage details = new RestaurantDetailsPage(restaurant: restaurant);
-                  final locationString = await details.getAddressFromLatLng(location.latitude,location.longitude);
-                  _locationController.text = locationString ?? '';
-                });
-              } else {
-                print('return nothing');
-              }
-            },
-            child: Text('Location Search'),
-          ),
+              ElevatedButton(
+                onPressed: () async {
+                  final suggestion = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => UserLocationPicker()));
+                  if (suggestion != null) {
+                    setState(() async {
+                      final location = suggestion as Position;
+                      restaurant.longitude = location.longitude.toString();
+                      restaurant.latitude = location.latitude.toString();
+                      RestaurantDetailsPage details =
+                          new RestaurantDetailsPage(restaurant: restaurant);
+                      final locationString = await details.getAddressFromLatLng(
+                          location.latitude, location.longitude);
+                      _locationController.text = locationString ?? '';
+                    });
+                  } else {
+                    print('return nothing');
+                  }
+                },
+                child: Text('Location Search'),
+              ),
               const SizedBox(height: 16.0),
               const Text('Select up to 5 timeslots:'),
               GridView.builder(
@@ -359,6 +408,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                     // TODO: Save the restaurant data to the database
                     final FirebaseStorage storage = FirebaseStorage.instance;
                     var data = DatabaseServices();
+                    restaurant.foodCategory = foodCategories;
                     restaurant.timeslots = selectedSlots;
                     //String imageurl;
                     Reference ref;

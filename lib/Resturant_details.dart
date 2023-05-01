@@ -45,9 +45,26 @@ class RestaurantDetailsPage extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Food Category: ${restaurant.foodCategory}',
-                style: TextStyle(fontSize: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Food Categories:',
+                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8.0),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: restaurant.foodCategory.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Text(
+                        '- ${restaurant.foodCategory[index]}',
+                        style: TextStyle(fontSize: 16.0),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
             Padding(
