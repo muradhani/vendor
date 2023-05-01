@@ -20,96 +20,182 @@ class RestaurantDetailsPage extends StatelessWidget {
   const RestaurantDetailsPage({Key? key, required this.restaurant})
       : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(224, 223, 83, 48),
+        backgroundColor: Color(0xFFDF5330),
         title: Text(restaurant.name),
       ),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(
-              restaurant.imgUrl,
+            SizedBox(
+              height: 250.0,
               width: double.infinity,
-              height: 200.0,
-              fit: BoxFit.cover,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                restaurant.description,
-                style: TextStyle(fontSize: 18.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+                child: Image.network(
+                  restaurant.imgUrl,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(height: 16),
                   Text(
-                    'Food Categories:',
-                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                    restaurant.description,
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  SizedBox(height: 8.0),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: restaurant.foodCategory.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Text(
-                        '- ${restaurant.foodCategory[index]}',
-                        style: TextStyle(fontSize: 16.0),
-                      );
-                    },
+                  SizedBox(height: 16),
+
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Food Categories:',
+                            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 8.0),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: restaurant.foodCategory.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Text(
+                                '- ${restaurant.foodCategory[index]}',
+                                style: TextStyle(fontSize: 16.0),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Text(
+                        'Number of Tables:',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 5.0),
+                        child: Text(
+                          restaurant.numTables.toString(),
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+
+                          ),
+                        ),),
+                    ],
                   ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Text(
+                        'Number of Seats:',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 5.0),
+                        child: Text(
+                          restaurant.numSeats.toString(),
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Text(
+                        'Time Slots:',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      Wrap(
+                        direction: Axis.vertical,
+                        alignment: WrapAlignment.start,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 5.0,
+                        runSpacing: 5.0,
+                        children: restaurant.timeslots.map((timeSlot) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                            child: Text(
+                              timeSlot,
+                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: FutureBuilder<String?>(
+                        future: getAddressFromLatLng(
+                            double.parse(restaurant.latitude),
+                            double.parse(restaurant.longitude)),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            final address = snapshot.data ?? '';
+                            return Text(
+                              'Location: $address',
+                              style: TextStyle(fontSize: 16.0),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+
+                  SizedBox(height: 32),
+                  Text(
+                    'Tables:',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 16),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Number of Tables: ${restaurant.numTables}',
-                style: TextStyle(fontSize: 16.0),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Number of Seats: ${restaurant.numSeats}',
-                style: TextStyle(fontSize: 16.0),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Time Slots: ${restaurant.timeslots.join(", ")}',
-                style: TextStyle(fontSize: 16.0),
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FutureBuilder<String?>(
-              future: getAddressFromLatLng(
-                  double.parse(restaurant.latitude),
-                  double.parse(restaurant.longitude)),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  final address = snapshot.data ?? '';
-                  return Text(
-                    'Location: $address',
-                    style: TextStyle(fontSize: 16.0),
-                  );
-                }
-              },
-            ),
-          ),
-
             TableLayout(restaurant: restaurant),
           ],
         ),
