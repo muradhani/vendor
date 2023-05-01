@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Restaurant {
@@ -8,16 +10,17 @@ class Restaurant {
   int _numSeats;
   List<String> _timeslots;
   String _id;
-  String _location;
+  String _longitude;
+  String _latitude;
   String _imgUrl;
   String _token;
   // Constructor with id parameter
   Restaurant.withId(this._id, this._name, this._description, this._foodCategory,
-      this._numTables, this._numSeats, this._timeslots,this._location,this._imgUrl,this._token);
+      this._numTables, this._numSeats, this._timeslots,this._latitude,this._longitude,this._imgUrl,this._token);
 
   // Constructor without id parameter (sets _id to null)
   Restaurant(this._name, this._description, this._foodCategory, this._numTables,
-      this._numSeats, this._timeslots,this._location,this._imgUrl,this._token)
+      this._numSeats, this._timeslots,this._latitude,this._longitude,this._imgUrl,this._token)
       : _id = 'null';
 
   // Empty constructor
@@ -29,7 +32,8 @@ class Restaurant {
         _numSeats = 0,
         _timeslots = [],
         _id = '',
-        _location='',
+        _latitude = '' ,
+        _longitude = '',
         _imgUrl='',
         _token='';
 
@@ -44,7 +48,8 @@ class Restaurant {
       data['num_tables'] as int,
       data['num_seats'] as int,
       List<String>.from(data['time_slots'] as List) as List<String>,
-      data['location'] as String,
+      data['latitude'] as String,
+      data['longitude'] as String,
       data['image'] as String,
       data['token'] ,
     );
@@ -78,11 +83,7 @@ class Restaurant {
 
   set id(String id) => _id = id;
 
-  String get location => _location;
 
-  set location(String value) {
-    _location = value;
-  }
 
   String get imgUrl => _imgUrl;
 
@@ -96,4 +97,15 @@ class Restaurant {
     _token = value;
   }
 
+  String get latitude => _latitude;
+
+  set latitude(String value) {
+    _latitude = value;
+  }
+
+  String get longitude => _longitude;
+
+  set longitude(String value) {
+    _longitude = value;
+  }
 }

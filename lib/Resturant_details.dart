@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:vendorapp/classes/Resturant.dart';
 import 'package:vendorapp/services/database.dart';
+import 'package:geocoding/geocoding.dart';
 
 class RestaurantDetailsPage extends StatelessWidget {
   final Restaurant restaurant;
+
+  Future<String?> getAddressFromLatLng(double latitude, double longitude) async {
+    final List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+    if (placemarks != null && placemarks.isNotEmpty) {
+      final Placemark placemark = placemarks.first;
+      return "${placemark.street}, ${placemark.locality}, ${placemark.administrativeArea} ${placemark.postalCode}, ${placemark.country}";
+    } else {
+      return null;
+    }
+  }
 
 
   const RestaurantDetailsPage({Key? key, required this.restaurant})
@@ -60,13 +71,28 @@ class RestaurantDetailsPage extends StatelessWidget {
                 style: TextStyle(fontSize: 16.0),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Location: ${restaurant.location}',
-                style: TextStyle(fontSize: 16.0),
-              ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FutureBuilder<String?>(
+              future: getAddressFromLatLng(
+                  double.parse(restaurant.latitude),
+                  double.parse(restaurant.longitude)),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  final address = snapshot.data ?? '';
+                  return Text(
+                    'Location: $address',
+                    style: TextStyle(fontSize: 16.0),
+                  );
+                }
+              },
             ),
+          ),
+
             TableLayout(restaurant: restaurant),
           ],
         ),

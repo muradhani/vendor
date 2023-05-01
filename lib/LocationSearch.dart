@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class UserLocationPicker extends StatefulWidget {
@@ -12,7 +13,6 @@ class UserLocationPicker extends StatefulWidget {
 
 class _UserLocationPickerState extends State<UserLocationPicker> {
   Position? location;
-
   void _pickLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -45,7 +45,12 @@ class _UserLocationPickerState extends State<UserLocationPicker> {
     }
     location = await Geolocator.getCurrentPosition();
     String locationString = 'long: ${location!.longitude.toString()}, lat: ${location!.latitude.toString()}';
-    Navigator.pop(context, locationString);
+    // if (location != null) {
+    //   getAddressFromLatLng(location!.latitude, location!.longitude);
+    // }
+    print("here in location search");
+    print(locationString);
+    Navigator.pop(context, location);
     setState(() {});
     // widget.locationPickFn(location!);
   }

@@ -17,7 +17,8 @@ class DatabaseServices {
       'num_tables': res.numTables,
       'num_seats': res.numSeats,
       'time_slots': res.timeslots,
-      'location': res.location,
+      'latitude': res.latitude,
+      'longitude': res.longitude,
       'image': res.imgUrl,
       'token': res.token
     });
