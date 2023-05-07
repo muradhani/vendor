@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vendorapp/classes/Resturant.dart';
 
+import '../classes/Category.dart';
+
 class DatabaseServices {
   final CollectionReference restaurantsCollection =
   FirebaseFirestore.instance.collection('resturant');
+
+  final CollectionReference categoryCollection =
+  FirebaseFirestore.instance.collection('categories');
 
   final CollectionReference booksCollection =
   FirebaseFirestore.instance.collection('books');
@@ -20,7 +25,8 @@ class DatabaseServices {
       'latitude': res.latitude,
       'longitude': res.longitude,
       'image': res.imgUrl,
-      'token': res.token
+      'token': res.token,
+      'location':res.location
     });
 
     // Get the ID of the newly added document
@@ -60,6 +66,7 @@ class DatabaseServices {
       'num_seats': numSeats,
       'time_slots': timeSlots,
       'sales_point': salesPoint,
+
     });
   }
 
@@ -103,4 +110,18 @@ class DatabaseServices {
     return bookedTables;
   }
 
+  Future<List<Category>> getAllCategories() async {
+    List<Category> categories = [];
+
+    try {
+      QuerySnapshot querySnapshot = await categoryCollection.get();
+      querySnapshot.docs.forEach((doc) {
+        categories.add(Category.fromSnapshot(doc));
+      });
+    } catch (e) {
+      print('Error getting categories: $e');
+    }
+
+    return categories;
+  }
 }

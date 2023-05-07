@@ -1,11 +1,28 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:vendorapp/classes/Resturant.dart';
 import 'package:vendorapp/services/database.dart';
 import 'package:geocoding/geocoding.dart';
 
-class RestaurantDetailsPage extends StatelessWidget {
-  final Restaurant restaurant;
 
+class RestaurantDetailsPage extends StatefulWidget {
+  final Restaurant restaurant;
+  RestaurantDetailsPage({Key? key, required this.restaurant})
+      : super(key: key);
+
+  @override
+  _RestaurantDetailsPageState createState() => _RestaurantDetailsPageState();
+}
+class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
+  late Restaurant restaurant;
+
+  var category;
+  var newCategory;
+  @override
+  void initState() {
+    super.initState();
+    restaurant = widget.restaurant;
+  }
   Future<String?> getAddressFromLatLng(double latitude, double longitude) async {
     final List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
     if (placemarks != null && placemarks.isNotEmpty) {
@@ -15,10 +32,23 @@ class RestaurantDetailsPage extends StatelessWidget {
       return null;
     }
   }
+  void updateCategory(String newCategory) {
+    setState(() {
+      category = newCategory;
+    });
+  }
+  Future<String> getFoodCategoryName(String categoryId) async {
+    DatabaseServices db = new DatabaseServices();
 
+    final categoryDoc = await db.categoryCollection.doc(categoryId).get();
+    if (categoryDoc.exists) {
+      final categoryName = categoryDoc.get('name');
+      return categoryName;
+    } else {
+      throw Exception('Food category not found');
+    }
+  }
 
-  const RestaurantDetailsPage({Key? key, required this.restaurant})
-      : super(key: key);
 
 
   @override
@@ -61,30 +91,114 @@ class RestaurantDetailsPage extends StatelessWidget {
                   ),
                   SizedBox(height: 16),
 
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Food Categories:',
-                            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 8.0),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: restaurant.foodCategory.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Text(
-                                '- ${restaurant.foodCategory[index]}',
-                                style: TextStyle(fontSize: 16.0),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Food Category:',
+                          style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8.0),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: FutureBuilder<String>(
+                                future: getFoodCategoryName(restaurant.foodCategory),
+                                builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return Text('Loading...');
+                                  } else if (snapshot.hasError) {
+                                    return Text('Error: ${snapshot.error}');
+                                  } else {
+                                    category = snapshot.data;
+                                    return Text('- ${snapshot.data}',
+                                      style: TextStyle(fontSize: 16.0),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.edit),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('Edit Food Category'),
+                                      content: StreamBuilder<QuerySnapshot>(
+                                        stream: FirebaseFirestore.instance.collection('categories').snapshots(),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.hasError) {
+                                            return Text('Failed to load food categories');
+                                          }
+                                          if (!snapshot.hasData) {
+                                            return Center(child: CircularProgressIndicator());
+                                          }
+                                          List<DropdownMenuItem<String>> dropdownItems = [];
+                                          for (var category in snapshot.data!.docs) {
+                                            dropdownItems.add(
+                                              DropdownMenuItem(
+                                                child: Text(category['name']),
+                                                value: category.id,
+                                              ),
+                                            );
+                                          }
+                                          return DropdownButtonFormField(
+                                            decoration: InputDecoration(hintText: 'Select new category'),
+                                            value: newCategory,
+                                            onChanged: (value) {
+                                              newCategory = value;
+                                              print(value);
+                                            },
+                                            items: dropdownItems,
+                                          );
+                                        },
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          child: Text('Cancel'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: Text('Save'),
+                                          onPressed: () {
+                                            // Get a reference to the restaurant document in Firebase
+                                            DocumentReference restaurantRef = FirebaseFirestore.instance.collection('resturant').doc(restaurant.id);
+
+                                            // Update the food category field of the restaurant document with the new category name
+                                            restaurantRef.update({'food_category': newCategory}).then((value) {
+                                              restaurant.foodCategory = newCategory;
+                                              updateCategory(newCategory);
+
+                                              // If the update was successful, close the dialog
+                                              Navigator.of(context).pop();
+                                            }).catchError((error) {
+                                              // If there was an error, display a message to the user
+                                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                content: Text('Failed to update food category: $error'),
+                                              ));
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+
+                          ],
+                        ),
+
+
+                      ],
                     ),
+                  ),
 
                   SizedBox(height: 16),
                   Row(
@@ -201,6 +315,12 @@ class RestaurantDetailsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    throw UnimplementedError();
   }
 }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vendorapp/Resturant_details.dart';
+import 'package:vendorapp/classes/Category.dart';
 import 'package:vendorapp/classes/Resturant.dart';
 import 'package:vendorapp/services/database.dart';
 import 'dart:io';
@@ -16,7 +17,6 @@ import 'package:geocoding/geocoding.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -24,8 +24,10 @@ void main() async {
   // data.addRestaurant("murad2", "ddddddd", "image", "foodCategory", 20, 20);
   MessagingService messagingService = MessagingService();
   await messagingService.initialize();
+
   runApp(MyApp());
 }
+
 class MessagingService {
   late FirebaseMessaging _firebaseMessaging;
 
@@ -84,8 +86,10 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
   String fcmToken = '';
   File? _image;
   String? _userLocation;
-  List<String> foodCategories = [];
+  var selectedValue;
 
+  List<Category> foodCategories =[];
+  Category selectedCategory = new Category(id:" ",name: " ");
   List<String> selectedSlots = [];
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   String? _selectedLocation;
@@ -94,30 +98,27 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
     List<Location> locations = await locationFromAddress(query);
     return locations;
   }
+  DatabaseServices db = new DatabaseServices();
 
   //String _fcmToken;
   @override
-  void initState() {
+  void initState(){
     super.initState();
     _getFcmToken();
-    // Listen for changes to the Firestore collection
-    // FirebaseFirestore.instance
-    //     .collection('myCollection')
-    //     .snapshots()
-    //     .listen((QuerySnapshot querySnapshot) {
-    //   querySnapshot.docChanges.forEach((change) {
-    //     if (change.type == DocumentChangeType.added) {
-    //       // Call the Cloud Function to send a push notification to the device when a new document is added to the collection
-    //       FirebaseMessaging.send(<String, dynamic>{
-    //         'title': change.doc['title'],
-    //         'body': change.doc['body'],
-    //         'deviceToken': _deviceToken,
-    //       });
-    //     }
-    //   });
-    // });
+    loadCategories();
+    if (foodCategories.isNotEmpty) {
+      selectedCategory = foodCategories.first;
+    }
   }
 
+  void loadCategories() async {
+    List<Category> categories = await db.getAllCategories();
+    setState(() {
+      foodCategories = categories;
+      print(foodCategories[0].name);
+      print(foodCategories[1].name);
+    });
+  }
   Future<void> _getFcmToken() async {
     String? token = await FirebaseMessaging.instance.getToken();
     if (token != null) {
@@ -177,7 +178,16 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
     });
   }
 
-  @override
+  Future<String?> getAddressFromLatLng(double latitude, double longitude) async {
+    final List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+    if (placemarks != null && placemarks.isNotEmpty) {
+      final Placemark placemark = placemarks.first;
+      return "${placemark.street}, ${placemark.locality}, ${placemark.administrativeArea} ${placemark.postalCode}, ${placemark.country}";
+    } else {
+      return null;
+    }}
+
+      @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -261,35 +271,23 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   return null;
                 },
               ),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Food Category',
-                ),
-                controller: _foodCategoryController,
-                onEditingComplete: () {
+              DropdownButtonFormField(
+                value: selectedValue,
+                items: foodCategories
+                    .map((category) => DropdownMenuItem(
+                  value: category.id,
+                  child: Text(category.name),
+                ))
+                    .toList(),
+                hint: Text("Select a food category"),
+                onChanged: ( categoryId) { // explicitly annotate the type as String
                   setState(() {
-                    foodCategories.add(_foodCategoryController.text);
+                    selectedValue = categoryId.toString();
+                    restaurant.foodCategory = selectedValue.toString();
+                    print("id from object"+restaurant.foodCategory);
                   });
-                  _foodCategoryController.clear();
+                  print("Selected category ID: $categoryId");
                 },
-              ),
-              ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: foodCategories.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return ListTile(
-                      title: Text(foodCategories[index]),
-                      trailing: IconButton(
-                        icon:Icon(Icons.delete),
-                        onPressed: (){
-                          setState(() {
-                            foodCategories.removeAt(index);
-                          });
-                        },
-                      ),
-                    );
-                  }
               ),
               TextFormField(
                 controller: _numTablesController,
@@ -350,11 +348,11 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                       final location = suggestion as Position;
                       restaurant.longitude = location.longitude.toString();
                       restaurant.latitude = location.latitude.toString();
-                      RestaurantDetailsPage details =
-                          new RestaurantDetailsPage(restaurant: restaurant);
-                      final locationString = await details.getAddressFromLatLng(
+
+                      final locationString = await getAddressFromLatLng(
                           location.latitude, location.longitude);
                       _locationController.text = locationString ?? '';
+                      restaurant.location = locationString!;
                     });
                   } else {
                     print('return nothing');
@@ -408,9 +406,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                     // TODO: Save the restaurant data to the database
                     final FirebaseStorage storage = FirebaseStorage.instance;
                     var data = DatabaseServices();
-                    restaurant.foodCategory = foodCategories;
                     restaurant.timeslots = selectedSlots;
-                    //String imageurl;
                     Reference ref;
                     final _image = this._image;
                     if (_image != null) {

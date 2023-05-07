@@ -1,11 +1,10 @@
-import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Restaurant {
   String _name;
   String _description;
-  List<String> _foodCategory;
+  String _foodCategory;
   int _numTables;
   int _numSeats;
   List<String> _timeslots;
@@ -14,6 +13,7 @@ class Restaurant {
   String _latitude;
   String _imgUrl;
   String _token;
+  String _location;
 
   // Constructor with id parameter
   Restaurant.withId(
@@ -27,7 +27,8 @@ class Restaurant {
       this._latitude,
       this._longitude,
       this._imgUrl,
-      this._token);
+      this._token,
+      this._location);
 
   // Constructor without id parameter (sets _id to null)
   Restaurant(
@@ -40,14 +41,15 @@ class Restaurant {
       this._latitude,
       this._longitude,
       this._imgUrl,
-      this._token)
+      this._token,
+      this._location)
       : _id = 'null';
 
   // Empty constructor
   Restaurant.empty()
       : _name = '',
         _description = '',
-        _foodCategory = [],
+        _foodCategory = '',
         _numTables = 0,
         _numSeats = 0,
         _timeslots = [],
@@ -55,7 +57,8 @@ class Restaurant {
         _latitude = '',
         _longitude = '',
         _imgUrl = '',
-        _token = '';
+        _token = '',
+        _location ='';
 
   factory Restaurant.fromSnapshot(DocumentSnapshot snapshot) {
     final data = snapshot.data() as Map<String, dynamic>;
@@ -63,7 +66,7 @@ class Restaurant {
       snapshot.id,
       data['name'] as String,
       data['description'] as String,
-      List<String>.from(data['food_category']as List) as List<String>,
+      data['food_category'],
       data['num_tables'] as int,
       data['num_seats'] as int,
       List<String>.from(data['time_slots'] as List) as List<String>,
@@ -71,6 +74,7 @@ class Restaurant {
       data['longitude'] as String,
       data['image'] as String,
       data['token'],
+      data['location']
     );
   }
 
@@ -82,9 +86,9 @@ class Restaurant {
 
   set description(String description) => _description = description;
 
-  List<String> get foodCategory => _foodCategory;
+  String get foodCategory => _foodCategory;
 
-  set foodCategory(List<String> foodCategory) => _foodCategory = foodCategory;
+  set foodCategory(String foodCategory) => _foodCategory = foodCategory;
 
   int get numTables => _numTables;
 
@@ -124,5 +128,11 @@ class Restaurant {
 
   set longitude(String value) {
     _longitude = value;
+  }
+
+  String get location => _location;
+
+  set location(String value) {
+    _location = value;
   }
 }
