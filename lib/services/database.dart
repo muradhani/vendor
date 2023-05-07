@@ -31,12 +31,12 @@ class DatabaseServices {
 
     // Get the ID of the newly added document
     final restaurantId = docRef.id;
-
-    // Add a new document to the books collection with the restaurant ID
-    await booksCollection.add({
-      'restaurant_id': restaurantId,
-      'booked_tables': []
-    });
+    //
+    // // Add a new document to the books collection with the restaurant ID
+    // await booksCollection.add({
+    //   'restaurant_id': restaurantId,
+    //   'booked_tables': []
+    // });
 
     return restaurantId;
   }
@@ -101,14 +101,33 @@ class DatabaseServices {
         .get();
 
     querySnapshot.docs.forEach((doc) {
-      List<dynamic> bookedTableNumbers = doc['booked_tables'];
-      bookedTableNumbers.forEach((tableNumber) {
-        bookedTables.add(tableNumber);
-      });
+      dynamic table = doc['table'];
+      if (table is List<dynamic>) {
+        List<dynamic> bookedTableNumbers = table;
+        String date = doc['date'];
+        String timeSlot = doc['time_slot'];
+        // Check if the date and time slot match the desired values
+
+          bookedTableNumbers.forEach((tableNumber) {
+            bookedTables.add(tableNumber);
+          });
+
+      } else if (table is int) {
+        int bookedTableNumber = table;
+        String date = doc['date'];
+        String timeSlot = doc['time_slot'];
+        // Check if the date and time slot match the desired values
+
+          bookedTables.add(bookedTableNumber);
+
+      }
     });
+
     print(bookedTables);
     return bookedTables;
   }
+
+
 
   Future<List<Category>> getAllCategories() async {
     List<Category> categories = [];
