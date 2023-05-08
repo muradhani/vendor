@@ -276,27 +276,27 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                     ],
                   ),
                   SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: FutureBuilder<String?>(
-                        future: getAddressFromLatLng(
-                            double.parse(restaurant.latitude),
-                            double.parse(restaurant.longitude)),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            final address = snapshot.data ?? '';
-                            return Text(
-                              'Location: $address',
-                              style: TextStyle(fontSize: 16.0),
-                            );
-                          }
-                        },
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: FutureBuilder<String?>(
+                      future: getAddressFromLatLng(
+                          double.parse(restaurant.latitude),
+                          double.parse(restaurant.longitude)),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          final address = snapshot.data ?? '';
+                          return Text(
+                            'Location: $address',
+                            style: TextStyle(fontSize: 16.0),
+                          );
+                        }
+                      },
                     ),
+                  ),
 
                   SizedBox(height: 32),
                   Text(
@@ -332,8 +332,8 @@ class TableLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final DatabaseServices data = DatabaseServices();
 
-    return FutureBuilder<List<int>>(
-      future: data.getBookedTables(restaurant.id ),
+    return FutureBuilder<Map<int, String>>(
+      future: data.getBookedTables(restaurant.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
@@ -344,7 +344,7 @@ class TableLayout extends StatelessWidget {
             child: Text('Error: ${snapshot.error}'),
           );
         } else {
-          final bookedTables = snapshot.data ?? [];
+          final Map<int, String> bookedTables = snapshot.data ?? {};
           return GridView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
@@ -355,7 +355,8 @@ class TableLayout extends StatelessWidget {
             ),
             itemCount: restaurant.numTables,
             itemBuilder: (context, index) {
-              final isBooked = bookedTables.contains(index+1) ? true : false;
+              final isBooked = bookedTables.containsKey(index + 1);
+              final timeSlot = isBooked ? bookedTables[index + 1] : '';
               return Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
@@ -376,7 +377,13 @@ class TableLayout extends StatelessWidget {
                       '${restaurant.numSeats} seats',
                       style: TextStyle(fontSize: 14),
                     ),
-
+                    SizedBox(height: 10),
+                    isBooked
+                        ? Text(
+                      'Reserved at $timeSlot',
+                      style: TextStyle(fontSize: 12),
+                    )
+                        : SizedBox.shrink(),
                   ],
                 ),
               );
@@ -385,5 +392,6 @@ class TableLayout extends StatelessWidget {
         }
       },
     );
+
   }
 }

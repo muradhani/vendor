@@ -92,8 +92,8 @@ class DatabaseServices {
     return querySnapshot.docs;
   }
 
-  Future<List<int>> getBookedTables(String restaurantId) async {
-    List<int> bookedTables = [];
+  Future<Map<int, String>> getBookedTables(String restaurantId) async {
+    Map<int, String> bookedTables = {};
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('books')
@@ -108,9 +108,9 @@ class DatabaseServices {
         String timeSlot = doc['time_slot'];
         // Check if the date and time slot match the desired values
 
-          bookedTableNumbers.forEach((tableNumber) {
-            bookedTables.add(tableNumber);
-          });
+        bookedTableNumbers.forEach((tableNumber) {
+          bookedTables[tableNumber] = timeSlot;
+        });
 
       } else if (table is int) {
         int bookedTableNumber = table;
@@ -118,14 +118,14 @@ class DatabaseServices {
         String timeSlot = doc['time_slot'];
         // Check if the date and time slot match the desired values
 
-          bookedTables.add(bookedTableNumber);
-
+        bookedTables[bookedTableNumber] = timeSlot;
       }
     });
 
     print(bookedTables);
     return bookedTables;
   }
+
 
 
 
