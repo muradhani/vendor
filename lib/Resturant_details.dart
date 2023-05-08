@@ -4,6 +4,8 @@ import 'package:vendorapp/classes/Resturant.dart';
 import 'package:vendorapp/services/database.dart';
 import 'package:geocoding/geocoding.dart';
 
+import 'classes/Book.dart';
+
 
 class RestaurantDetailsPage extends StatefulWidget {
   final Restaurant restaurant;
@@ -332,7 +334,7 @@ class TableLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final DatabaseServices data = DatabaseServices();
 
-    return FutureBuilder<Map<int, String>>(
+    return FutureBuilder<List<Book>>(
       future: data.getBookedTables(restaurant.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -344,7 +346,7 @@ class TableLayout extends StatelessWidget {
             child: Text('Error: ${snapshot.error}'),
           );
         } else {
-          final Map<int, String> bookedTables = snapshot.data ?? {};
+          final List<Book> bookedTables = snapshot.data ?? [];
           return GridView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
@@ -355,8 +357,8 @@ class TableLayout extends StatelessWidget {
             ),
             itemCount: restaurant.numTables,
             itemBuilder: (context, index) {
-              final isBooked = bookedTables.containsKey(index + 1);
-              final timeSlot = isBooked ? bookedTables[index + 1] : '';
+              final isBooked = bookedTables.any((book) => book.table == index + 1);
+              final bookedTable = bookedTables.firstWhere((book) => book.table == index + 1);
               return Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
@@ -379,9 +381,18 @@ class TableLayout extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     isBooked
-                        ? Text(
-                      'Reserved at $timeSlot',
-                      style: TextStyle(fontSize: 12),
+                        ? Column(
+                      children: [
+                        Text(
+                          'Reserved on ${bookedTable.date}\n at ${bookedTable.timeSlot}',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'Table ${bookedTable.table}',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
                     )
                         : SizedBox.shrink(),
                   ],
@@ -392,6 +403,7 @@ class TableLayout extends StatelessWidget {
         }
       },
     );
+
 
   }
 }

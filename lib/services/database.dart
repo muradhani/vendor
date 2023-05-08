@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vendorapp/classes/Resturant.dart';
 
+import '../classes/Book.dart';
 import '../classes/Category.dart';
 
 class DatabaseServices {
@@ -92,8 +93,8 @@ class DatabaseServices {
     return querySnapshot.docs;
   }
 
-  Future<Map<int, String>> getBookedTables(String restaurantId) async {
-    Map<int, String> bookedTables = {};
+  Future<List<Book>> getBookedTables(String restaurantId) async {
+    List<Book> bookedTables = [];
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('books')
@@ -109,7 +110,7 @@ class DatabaseServices {
         // Check if the date and time slot match the desired values
 
         bookedTableNumbers.forEach((tableNumber) {
-          bookedTables[tableNumber] = timeSlot;
+          bookedTables.add(Book(date, timeSlot, tableNumber));
         });
 
       } else if (table is int) {
@@ -118,13 +119,13 @@ class DatabaseServices {
         String timeSlot = doc['time_slot'];
         // Check if the date and time slot match the desired values
 
-        bookedTables[bookedTableNumber] = timeSlot;
+        bookedTables.add(Book(date, timeSlot, bookedTableNumber));
       }
     });
 
-    print(bookedTables);
     return bookedTables;
   }
+
 
 
 
