@@ -44,6 +44,7 @@ dependencies:
   flutter_typeahead: ^4.3.7
   geocoding: ^2.1.0
   geolocator: ^9.0.2
+  flutter_local_notifications: ^6.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vendorapp/Resturant_details.dart';
@@ -16,41 +17,59 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  // var data = DatabaseServices();
-  // data.addRestaurant("murad2", "ddddddd", "image", "foodCategory", 20, 20);
-  MessagingService messagingService = MessagingService();
-  await messagingService.initialize();
 
   runApp(MyApp());
 }
 
+
 class MessagingService {
   late FirebaseMessaging _firebaseMessaging;
-
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
   Future<void> initialize() async {
+    // Initialize the Firebase Messaging instance.
     _firebaseMessaging = FirebaseMessaging.instance;
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
+    // Configure the local notification plugin.
+    await initializeNotifications();
 
-      if (message.notification != null) {
-        print('Message also contained a notification: ${message.notification}');
-      }
+    // Listen for FCM messages.
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      final String title = message.notification?.title ?? 'Title';
+      final String body = message.notification?.body ?? 'Body';
+      final AndroidNotificationDetails androidPlatformChannelSpecifics =
+      AndroidNotificationDetails('your channel id', 'your channel name', 'your channel description',
+          importance: Importance.high, priority: Priority.high, ticker: 'ticker');
+      final NotificationDetails platformChannelSpecifics =
+      NotificationDetails(android: androidPlatformChannelSpecifics);
+      await flutterLocalNotificationsPlugin.show(
+          0, title, body, platformChannelSpecifics,
+          payload: 'item x');
     });
 
+    // Handle the tap event when the app is in the foreground.
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
-      print('Message data: ${message.data}');
-
-      if (message.notification != null) {
-        print('Message also contained a notification: ${message.notification}');
-      }
+      // Handle the tap event here.
     });
   }
+  Future<void> initializeNotifications() async {
+
+    const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('app_icon');
+    const InitializationSettings initializationSettings =
+    InitializationSettings(android: initializationSettingsAndroid);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: onSelectNotification);
+  }
+
+  Future<void> onSelectNotification(String? payload) async {
+    // Handle the notification tap event here.
+  }
+
 }
 
 class MyApp extends StatelessWidget {
@@ -106,11 +125,28 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
     super.initState();
     _getFcmToken();
     loadCategories();
+    registerNotifications();
+    MessagingService messagingService = MessagingService();
+    messagingService.initialize();
+
     if (foodCategories.isNotEmpty) {
       selectedCategory = foodCategories.first;
     }
   }
 
+  void registerNotifications() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Received notification: ${message.notification!.title}');
+    });
+    FirebaseMessaging.onBackgroundMessage((RemoteMessage message) {
+      print('Received notification: ${message.notification!.title}');
+      return Future.value();
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('Notification opened: ${message.notification!.title}');
+    });
+  }
   void loadCategories() async {
     List<Category> categories = await db.getAllCategories();
     setState(() {
